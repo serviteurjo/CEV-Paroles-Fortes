@@ -3,16 +3,16 @@ import { Player } from "@remotion/player";
 import { PosterComposition } from "./Composition";
 import type { PosterProps } from "./Composition";
 import * as htmlToImage from "html-to-image";
-import { Image, Type, User, Download, Upload } from "lucide-react";
+import { Image, Type, User, Download, Upload, Sparkles } from "lucide-react";
 
 function App() {
-  const [formData, setFormData] = useState<PosterProps>({
+  const [formData, setFormData] = useState<PosterProps & { bgColor?: string }>({
     programName: "Programme Christ en nous",
     quoteText: "La croissance spirituelle ne se définit pas par les dons, ni la connaissance des écritures, mais par la capacité à devenir comme Christ.",
     speakerName: "YANNICK DJATTI",
     speakerImageUrl: "/assets/image1.jpg",
+    bgColor: "#9e0b0d"
   });
-
   const [isExporting, setIsExporting] = useState(false);
   const hiddenRenderRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +28,6 @@ function App() {
       setFormData((prev) => ({ ...prev, speakerImageUrl: imageUrl }));
     }
   };
-
   const downloadPoster = async () => {
     if (!hiddenRenderRef.current) return;
     setIsExporting(true);
@@ -41,7 +40,7 @@ function App() {
         quality: 1,
         pixelRatio: 1,
         width: 1080,
-        height: 1080,
+        height: 1350,
         skipFonts: false
       });
 
@@ -65,7 +64,7 @@ function App() {
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-[#b71618] flex items-center gap-3">
             <Image className="text-orange-500" size={32} />
-            Studio QARIS
+            CEV Paroles Fortes
           </h1>
           <p className="text-sm text-slate-500 mt-2 ml-11">
             Générateur Automatisé d'Affiches
@@ -106,10 +105,28 @@ function App() {
 
           <div className="space-y-2 pt-4">
             <label className="text-sm font-semibold flex items-center gap-2 mb-2">
-              <Upload size={16} /> Image Portrait Intervenant (Sans Fond)
+              <Sparkles size={16} className="text-yellow-500" /> Couleur de l'arrière-plan
             </label>
-            <label className="block w-full cursor-pointer border-2 border-dashed border-[#b71618]/50 hover:bg-slate-50 rounded-xl p-6 text-center transition">
-              <span className="text-sm text-[#b71618] font-medium">Cliquez pour importer la photo</span>
+            <select
+              value={formData.bgColor}
+              onChange={(e) => setFormData(prev => ({ ...prev, bgColor: e.target.value }))}
+              className="w-full border-2 border-slate-200 rounded-lg p-3 outline-none focus:border-[#b71618] transition appearance-none bg-white font-medium"
+            >
+              <option value="#9e0b0d">Rouge</option>
+              <option value="#000000">Noir</option>
+              <option value="#4c1d95">Violet</option>
+              <option value="#880e4f">Rose Sombre</option>
+            </select>
+          </div>
+
+          <div className="space-y-2 pt-4">
+            <label className="text-sm font-semibold flex items-center gap-2 mb-2">
+              <Sparkles size={16} className="text-yellow-500" /> Importer la photo
+            </label>
+            <label className="block w-full cursor-pointer border-2 border-dashed rounded-xl p-6 text-center transition border-[#b71618]/50 hover:bg-slate-50">
+              <span className="text-sm text-[#b71618] font-medium flex items-center justify-center gap-2">
+                <Upload size={18} /> Cliquez pour remplacer l'orateur
+              </span>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
             </label>
           </div>
@@ -130,14 +147,14 @@ function App() {
       {/* Right Panel: Live Preview via Remotion Player */}
       <div className="flex-1 bg-slate-200 flex justify-center items-center p-8 overflow-hidden relative" style={{ backgroundImage: "radial-gradient(#cbd5e1 1px, transparent 0)", backgroundSize: "20px 20px" }}>
         {/* Visual container (SCALED FOR VIEWING) */}
-        <div className="shadow-2xl overflow-hidden rounded transform-gpu z-10 w-[min(100%,_800px)] aspect-square border-4 border-white/50 bg-white">
+        <div className="shadow-2xl overflow-hidden rounded transform-gpu z-10 w-[max(100%,_800px)] lg:w-[600px] aspect-[4/5] border-4 border-white/50 bg-white">
           <Player
             component={PosterComposition as React.FC<any>}
             inputProps={formData}
             durationInFrames={1}
             fps={30}
             compositionWidth={1080}
-            compositionHeight={1080}
+            compositionHeight={1350}
             style={{ width: "100%", height: "100%" }}
             controls={false}
             autoPlay={false}
@@ -149,10 +166,9 @@ function App() {
       {/* Hidden 1:1 render for perfect export */}
       <div
         className="fixed top-[-2000px] left-[-2000px]"
-        style={{ width: "1080px", height: "1080px", pointerEvents: 'none' }}
+        style={{ width: "1080px", height: "1350px", pointerEvents: 'none' }}
       >
-        {/* Using a pure div instead of Player to guarantee DOM cleanliness for html-to-image */}
-        <div ref={hiddenRenderRef} style={{ width: 1080, height: 1080, position: 'relative' }}>
+        <div ref={hiddenRenderRef} style={{ width: 1080, height: 1350, position: 'relative' }}>
           <PosterComposition {...formData} />
         </div>
       </div>
