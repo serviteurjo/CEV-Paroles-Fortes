@@ -39,7 +39,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
 
             {/* Background (Image 4) - watermark pattern */}
             <Img
-                src="/assets/image4.jpg"
+                src="assets/image4.jpg"
                 className="absolute top-0 left-0 w-full h-full object-fill opacity-25"
                 style={{ zIndex: 0 }}
             />
@@ -47,7 +47,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
             {/* Top-Left: Main Logo (Always present) */}
             <div className="absolute top-[60px] left-[60px] z-10">
                 <Img
-                    src="/assets/logo-christennous.png"
+                    src="assets/logo-christennous.png"
                     className="h-[60px] object-contain"
                     style={{ filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.3))" }}
                 />
@@ -64,7 +64,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                     </h2>
                 ) : (
                     <Img
-                        src={`${programMode === 'profondeur' ? "/assets/logo-profondeur.png" : "/assets/logo-club-e.png"}?v=${Date.now()}`}
+                        src={`${programMode === 'profondeur' ? "assets/logo-profondeur.png" : "assets/logo-club-e.png"}?v=${Date.now()}`}
                         className="h-[75px] object-contain object-right"
                     />
                 )}
@@ -103,20 +103,21 @@ export const PosterComposition: React.FC<PosterProps> = ({
                 {/* Left side: Speaker Picture */}
                 <div className="w-[52%] h-full flex justify-center items-end relative mt-[-15px] ml-[-25px]">
                     <Img
-                        src={speakerImageUrl || "/assets/image1.jpg"}
+                        src={speakerImageUrl || "assets/image1.jpg"}
                         className="h-full object-cover object-bottom drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
                     />
                 </div>
 
                 {/* Right side: Quote Text */}
-                <div className="w-[48%] h-full pl-[35px] flex flex-col justify-center pt-[60px] pb-[50px] relative">
+                <div className="w-[48%] h-full pl-[35px] flex flex-col justify-center pt-[40px] pb-[40px] relative">
                     <p
                         className="text-white font-bold leading-[1.3] drop-shadow-2xl relative z-10"
                         style={{
                             textShadow: "0px 4px 15px rgba(0,0,0,0.8)",
                             fontFamily: "'Georgia', serif",
-                            fontSize: quoteText.length < 80 ? "52px" :
-                                quoteText.length < 160 ? "44px" : "36px"
+                            fontSize: quoteText.length < 60 ? "56px" :
+                                      quoteText.length < 120 ? "48px" :
+                                      quoteText.length < 200 ? "38px" : "30px"
                         }}
                     >
                         {quoteText || "La croissance spirituelle ne se définit pas par les dons, ni la connaissance des écritures, mais par la capacité à devenir comme Christ."}
