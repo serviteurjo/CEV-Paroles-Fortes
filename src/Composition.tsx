@@ -73,59 +73,43 @@ export const PosterComposition: React.FC<PosterProps> = ({
                 )}
             </div>
 
-            {/* Improved SVG Griffe: Guarantees perfect curves on all devices and avoids mobile "chevron" bug */}
-            <div className="absolute top-[180px] right-[65px] z-20 w-[320px] h-[320px] pointer-events-none">
-                <svg viewBox="0 0 100 100" width="100%" height="100%" overflow="visible">
-                    {/* Level 1: Outer White Outline */}
-                    <text
-                        x="50"
-                        y="75"
-                        textAnchor="middle"
-                        style={{
-                            fontFamily: "'Georgia', 'Lora', serif",
-                            fontWeight: "bold",
-                            fontSize: "110px",
-                            fill: "white",
-                            stroke: "white",
-                            strokeWidth: "14px",
-                            strokeLinejoin: "round",
-                            paintOrder: "stroke fill"
-                        }}
-                    >
-                        ”
-                    </text>
-                    {/* Level 2: Background-color gap */}
-                    <text
-                        x="50"
-                        y="75"
-                        textAnchor="middle"
-                        style={{
-                            fontFamily: "'Georgia', 'Lora', serif",
-                            fontWeight: "bold",
-                            fontSize: "110px",
-                            fill: bgColor,
-                            stroke: bgColor,
-                            strokeWidth: "9px",
-                            strokeLinejoin: "round",
-                            paintOrder: "stroke fill"
-                        }}
-                    >
-                        ”
-                    </text>
-                    {/* Level 3: Inner Orange Core */}
-                    <text
-                        x="50"
-                        y="75"
-                        textAnchor="middle"
-                        style={{
-                            fontFamily: "'Georgia', 'Lora', serif",
-                            fontWeight: "bold",
-                            fontSize: "110px",
-                            fill: "#ff8200"
-                        }}
-                    >
-                        ”
-                    </text>
+            {/* Pixel-Perfect SVG Griffe: 
+                Matches the "99" shape, specific overlap, and 3-layer styling (White/Dark/Orange).
+                Positioned exactly between 'T' and 'S' of the background watermark.
+            */}
+            <div className="absolute top-[210px] right-[100px] z-20 w-[240px] h-[200px] pointer-events-none drop-shadow-2xl">
+                <svg viewBox="0 0 160 120" width="100%" height="100%" overflow="visible">
+                    <defs>
+                        <style>{`
+                            .griffe-text {
+                                fontFamily: 'Georgia', serif;
+                                fontWeight: 900;
+                                fontSize: 135px;
+                                strokeLinejoin: round;
+                                paintOrder: stroke fill;
+                            }
+                        `}</style>
+                    </defs>
+                    
+                    {/* First Quote Character (The one on the left) */}
+                    <g transform="translate(0, 0)">
+                        {/* Layer 1: Outer White */}
+                        <text x="35" y="100" className="griffe-text" style={{ fill: 'white', stroke: 'white', strokeWidth: '22px' }}>”</text>
+                        {/* Layer 2: Dark Background Gap (Deep Blue/Black to match original look) */}
+                        <text x="35" y="100" className="griffe-text" style={{ fill: '#0a0a20', stroke: '#0a0a20', strokeWidth: '14px' }}>”</text>
+                        {/* Layer 3: Orange Core */}
+                        <text x="35" y="100" className="griffe-text" style={{ fill: '#ff8200' }}>”</text>
+                    </g>
+
+                    {/* Second Quote Character (The one on the right, slightly overlapping and lower) */}
+                    <g transform="translate(65, 15)">
+                        {/* Layer 1: Outer White */}
+                        <text x="35" y="100" className="griffe-text" style={{ fill: 'white', stroke: 'white', strokeWidth: '22px' }}>”</text>
+                        {/* Layer 2: Dark Background Gap */}
+                        <text x="35" y="100" className="griffe-text" style={{ fill: '#0a0a20', stroke: '#0a0a20', strokeWidth: '14px' }}>”</text>
+                        {/* Layer 3: Orange Core */}
+                        <text x="35" y="100" className="griffe-text" style={{ fill: '#ff8200' }}>”</text>
+                    </g>
                 </svg>
             </div>
 
