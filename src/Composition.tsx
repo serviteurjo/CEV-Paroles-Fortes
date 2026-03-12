@@ -73,14 +73,14 @@ export const PosterComposition: React.FC<PosterProps> = ({
                 )}
             </div>
 
-            {/* Refined SVG Griffe: Smaller, lower, and tilted for a more natural look */}
-            <div className="absolute top-[235px] right-[85px] z-20 w-[240px] h-[240px] pointer-events-none">
+            {/* Refined SVG Griffe: Straight (normal) and slightly lower position */}
+            <div className="absolute top-[250px] right-[85px] z-20 w-[240px] h-[240px] pointer-events-none">
                 <svg 
                     viewBox="0 0 100 100" 
                     width="100%" 
                     height="100%" 
                     overflow="visible"
-                    style={{ transform: 'rotate(12deg)', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.4))' }}
+                    style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.4))' }}
                 >
                     {/* Level 1: Outer White Outline */}
                     <text
