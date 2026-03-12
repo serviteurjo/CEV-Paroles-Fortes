@@ -74,11 +74,11 @@ export const PosterComposition: React.FC<PosterProps> = ({
             </div>
 
             {/* Refined SVG Griffe: Straight (normal) and slightly lower position */}
-            <div className="absolute top-[250px] right-[85px] z-20 w-[240px] h-[240px] pointer-events-none">
-                <svg 
-                    viewBox="0 0 100 100" 
-                    width="100%" 
-                    height="100%" 
+            <div className="absolute top-[250px] right-[35px] z-20 w-[240px] h-[240px] pointer-events-none">
+                <svg
+                    viewBox="0 0 100 100"
+                    width="100%"
+                    height="100%"
                     overflow="visible"
                     style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.4))' }}
                 >
@@ -93,7 +93,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                             fontSize: "100px",
                             fill: "white",
                             stroke: "white",
-                            strokeWidth: "16px",
+                            strokeWidth: "10px",
                             strokeLinejoin: "round",
                             paintOrder: "stroke fill"
                         }}
@@ -111,7 +111,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                             fontSize: "100px",
                             fill: bgColor,
                             stroke: bgColor,
-                            strokeWidth: "10px",
+                            strokeWidth: "8px",
                             strokeLinejoin: "round",
                             paintOrder: "stroke fill"
                         }}
