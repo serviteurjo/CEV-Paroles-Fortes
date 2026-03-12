@@ -73,33 +73,60 @@ export const PosterComposition: React.FC<PosterProps> = ({
                 )}
             </div>
 
-            {/* Fixed Quote Mark (Griffe) styling: Yellow core -> Neutral Gap -> Thin White Outline */}
-            <div
-                className="absolute top-[210px] right-[80px] z-10 text-[280px] leading-none opacity-100"
-                style={{ fontFamily: "'Lora', serif", fontWeight: 700 }}
-            >
-                {/* Layer 1: The very thin white outer outline */}
-                <span className="absolute left-0 top-0" style={{
-                    WebkitTextStroke: "32px white",
-                    color: "white"
-                }}>
-                    ”
-                </span>
-                {/* Layer 2: The neutral gap (same as background color) */}
-                <span className="absolute left-0 top-0" style={{
-                    WebkitTextStroke: "26px " + bgColor,
-                    color: bgColor
-                }}>
-                    ”
-                </span>
-                {/* Layer 3: The solid yellow/orange inner griffe */}
-                <span className="relative" style={{
-                    color: "#ff8200",
-                    display: "block",
-                    textShadow: "0 10px 20px rgba(0,0,0,0.3)"
-                }}>
-                    ”
-                </span>
+            {/* Improved SVG Griffe: Guarantees perfect curves on all devices and avoids mobile "chevron" bug */}
+            <div className="absolute top-[180px] right-[65px] z-20 w-[320px] h-[320px] pointer-events-none">
+                <svg viewBox="0 0 100 100" width="100%" height="100%" overflow="visible">
+                    {/* Level 1: Outer White Outline */}
+                    <text
+                        x="50"
+                        y="75"
+                        textAnchor="middle"
+                        style={{
+                            fontFamily: "'Georgia', 'Lora', serif",
+                            fontWeight: "bold",
+                            fontSize: "110px",
+                            fill: "white",
+                            stroke: "white",
+                            strokeWidth: "14px",
+                            strokeLinejoin: "round",
+                            paintOrder: "stroke fill"
+                        }}
+                    >
+                        ”
+                    </text>
+                    {/* Level 2: Background-color gap */}
+                    <text
+                        x="50"
+                        y="75"
+                        textAnchor="middle"
+                        style={{
+                            fontFamily: "'Georgia', 'Lora', serif",
+                            fontWeight: "bold",
+                            fontSize: "110px",
+                            fill: bgColor,
+                            stroke: bgColor,
+                            strokeWidth: "9px",
+                            strokeLinejoin: "round",
+                            paintOrder: "stroke fill"
+                        }}
+                    >
+                        ”
+                    </text>
+                    {/* Level 3: Inner Orange Core */}
+                    <text
+                        x="50"
+                        y="75"
+                        textAnchor="middle"
+                        style={{
+                            fontFamily: "'Georgia', 'Lora', serif",
+                            fontWeight: "bold",
+                            fontSize: "110px",
+                            fill: "#ff8200"
+                        }}
+                    >
+                        ”
+                    </text>
+                </svg>
             </div>
 
             {/* Middle Section: Photo on Left, Text on Right */}
@@ -119,7 +146,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                         className="text-white font-bold leading-[1.3] drop-shadow-2xl relative z-10"
                         style={{
                             textShadow: "0px 4px 15px rgba(0,0,0,0.8)",
-                            fontFamily: "'Lora', serif",
+                            fontFamily: "'Georgia', serif",
                             fontSize: quoteText.length < 60 ? "56px" :
                                       quoteText.length < 120 ? "48px" :
                                       quoteText.length < 200 ? "38px" : "30px"
