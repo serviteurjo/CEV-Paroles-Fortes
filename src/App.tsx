@@ -121,6 +121,7 @@ function App() {
           relative z-10
           shrink-0
           min-h-0
+          h-full
         `}
       >
         {/* Header */}
@@ -135,7 +136,10 @@ function App() {
         </div>
 
         {/* Form body - scrollable part */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-5 py-5 sm:px-7 sm:py-6 space-y-5">
+        <div 
+          className="flex-1 overflow-y-auto min-h-0 px-5 py-5 sm:px-7 sm:py-6 space-y-5"
+          style={{ touchAction: 'pan-y' }}
+        >
 
           {/* SECTION 1: Choix du Programme */}
           <div className="space-y-3">
