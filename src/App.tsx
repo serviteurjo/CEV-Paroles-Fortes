@@ -81,7 +81,7 @@ function App() {
 
   return (
     // Root shell: full screen, no overflow, flex column on mobile, flex row on desktop
-    <div className="flex flex-col lg:flex-row h-screen bg-slate-100 font-sans text-slate-800 overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-[100dvh] bg-slate-100 font-sans text-slate-800 overflow-hidden">
 
       {/* ─── MOBILE TAB BAR (hidden on desktop) ─── */}
       <div className="lg:hidden flex border-b border-slate-200 bg-white shadow-sm z-20 shrink-0">
@@ -118,9 +118,9 @@ function App() {
           flex-col
           w-full lg:w-[420px] xl:w-[460px]
           border-r border-slate-200 bg-white shadow-2xl
-          overflow-y-auto
           relative z-10
           shrink-0
+          min-h-0
         `}
       >
         {/* Header */}
@@ -134,8 +134,8 @@ function App() {
           </p>
         </div>
 
-        {/* Form body */}
-        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6 space-y-5">
+        {/* Form body - scrollable part */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-5 py-5 sm:px-7 sm:py-6 space-y-5">
 
           {/* SECTION 1: Choix du Programme */}
           <div className="space-y-3">
