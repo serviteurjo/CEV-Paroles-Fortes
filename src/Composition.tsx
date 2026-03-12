@@ -42,6 +42,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                 src="assets/image4.jpg"
                 className="absolute top-0 left-0 w-full h-full object-fill opacity-25"
                 style={{ zIndex: 0 }}
+                crossOrigin="anonymous"
             />
 
             {/* Top-Left: Main Logo (Always present) */}
@@ -50,6 +51,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                     src="assets/logo-christennous.png"
                     className="h-[60px] object-contain"
                     style={{ filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.3))" }}
+                    crossOrigin="anonymous"
                 />
             </div>
 
@@ -64,8 +66,9 @@ export const PosterComposition: React.FC<PosterProps> = ({
                     </h2>
                 ) : (
                     <Img
-                        src={`${programMode === 'profondeur' ? "assets/logo-profondeur.png" : "assets/logo-club-e.png"}?v=${Date.now()}`}
+                        src={programMode === 'profondeur' ? "assets/logo-profondeur.png" : "assets/logo-club-e.png"}
                         className="h-[75px] object-contain object-right"
+                        crossOrigin="anonymous"
                     />
                 )}
             </div>
@@ -105,6 +108,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                     <Img
                         src={speakerImageUrl || "assets/image1.jpg"}
                         className="h-full object-cover object-bottom drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+                        crossOrigin="anonymous"
                     />
                 </div>
 

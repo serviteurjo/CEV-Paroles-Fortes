@@ -18,7 +18,7 @@ function App() {
     manualProgramName: "Programme Christ en nous",
     quoteText: "La croissance spirituelle ne se définit pas par les dons, ni la connaissance des écritures, mais par la capacité à devenir comme Christ.",
     speakerName: "YANNICK DJATTI",
-    speakerImageUrl: "/assets/image1.jpg",
+    speakerImageUrl: "assets/image1.jpg",
     bottomBannerText: DEFAULT_BANNER_TEXT,
     bottomBannerPhone: DEFAULT_BANNER_PHONE,
     bgColor: "#9e0b0d"
