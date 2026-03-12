@@ -56,24 +56,43 @@ function App() {
   const downloadPoster = async () => {
     if (!hiddenRenderRef.current) return;
     setIsExporting(true);
-    // Extra delay for mobile/slower devices + font stabilization
-    await new Promise(r => setTimeout(r, 500));
+    
+    // 1. Wait longer for mobile/slower connections to settle fonts and images
+    await new Promise(r => setTimeout(r, 1000));
+    
     try {
-      const dataUrl = await htmlToImage.toPng(hiddenRenderRef.current, {
+      // 2. Use toBlob for better memory handling on mobile browsers
+      const blob = await htmlToImage.toBlob(hiddenRenderRef.current, {
         quality: 1,
-        pixelRatio: 2, // Better quality for modern phone displays
+        pixelRatio: 2,
         width: 1080,
         height: 1350,
-        cacheBust: true, // Prevent cached assets issues
-        skipFonts: false
+        cacheBust: true,
+        skipFonts: false,
+        style: {
+           // Ensure it's fully opaque during capture
+           opacity: "1",
+           visibility: "visible"
+        }
       });
+
+      if (!blob) throw new Error("Échec de la création du blob");
+
+      // 3. Trigger download via URL object
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.download = `Affiche_${formData.speakerName.replace(/\s+/g, "_")}.png`;
-      link.href = dataUrl;
+      link.href = url;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
     } catch (err) {
       console.error("Erreur lors de l'export: ", err);
-      alert("Erreur lors de la génération de l'affiche.");
+      alert("Erreur technique lors de la génération. Veuillez réessayer ou utiliser un autre navigateur.");
     } finally {
       setIsExporting(false);
     }
@@ -330,8 +349,12 @@ function App() {
         </div>
       </div>
 
-      {/* Hidden render for export — persistent in DOM but invisible to user */}
-      <div className="fixed pointer-events-none opacity-0 left-0 top-0 overflow-hidden" aria-hidden="true">
+      {/* Hidden render for export — moved off-screen but rendered for capture */}
+      <div 
+        className="fixed" 
+        style={{ left: '-9999px', top: '0', pointerEvents: 'none' }} 
+        aria-hidden="true"
+      >
         <div ref={hiddenRenderRef} style={{ width: 1080, height: 1350, position: 'relative' }}>
           <PosterComposition {...formData} />
         </div>
