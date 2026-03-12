@@ -75,19 +75,19 @@ export const PosterComposition: React.FC<PosterProps> = ({
 
             {/* Fixed Quote Mark (Griffe) styling: Yellow core -> Neutral Gap -> Thin White Outline */}
             <div
-                className="absolute top-[210px] right-[80px] z-10 text-[300px] leading-none opacity-100"
-                style={{ fontFamily: "'Georgia', serif" }}
+                className="absolute top-[210px] right-[80px] z-10 text-[280px] leading-none opacity-100"
+                style={{ fontFamily: "'Lora', serif", fontWeight: 700 }}
             >
                 {/* Layer 1: The very thin white outer outline */}
                 <span className="absolute left-0 top-0" style={{
-                    WebkitTextStroke: "34px white",
+                    WebkitTextStroke: "32px white",
                     color: "white"
                 }}>
                     ”
                 </span>
                 {/* Layer 2: The neutral gap (same as background color) */}
                 <span className="absolute left-0 top-0" style={{
-                    WebkitTextStroke: "30px " + bgColor,
+                    WebkitTextStroke: "26px " + bgColor,
                     color: bgColor
                 }}>
                     ”
@@ -95,7 +95,8 @@ export const PosterComposition: React.FC<PosterProps> = ({
                 {/* Layer 3: The solid yellow/orange inner griffe */}
                 <span className="relative" style={{
                     color: "#ff8200",
-                    display: "block"
+                    display: "block",
+                    textShadow: "0 10px 20px rgba(0,0,0,0.3)"
                 }}>
                     ”
                 </span>
@@ -118,7 +119,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
                         className="text-white font-bold leading-[1.3] drop-shadow-2xl relative z-10"
                         style={{
                             textShadow: "0px 4px 15px rgba(0,0,0,0.8)",
-                            fontFamily: "'Georgia', serif",
+                            fontFamily: "'Lora', serif",
                             fontSize: quoteText.length < 60 ? "56px" :
                                       quoteText.length < 120 ? "48px" :
                                       quoteText.length < 200 ? "38px" : "30px"
