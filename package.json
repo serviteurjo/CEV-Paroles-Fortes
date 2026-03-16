@@ -12,8 +12,6 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "@imgly/background-removal": "^1.7.0",
-    "@imgly/background-removal-data": "^1.4.5",
     "@remotion/player": "^4.0.434",
     "@tailwindcss/vite": "^4.2.1",
     "html-to-image": "^1.11.13",

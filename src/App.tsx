@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useDeferredValue, useCallback, memo } from "react";
 import { Player } from "@remotion/player";
 import { PosterComposition } from "./Composition";
 import type { PosterProps } from "./Composition";
@@ -29,74 +29,192 @@ function App() {
   const [mobileTab, setMobileTab] = useState<MobileTab>("form");
   const hiddenRenderRef = useRef<HTMLDivElement>(null);
 
+  // Use deferred value for the preview to keep inputs snappy
+  const deferredFormData = useDeferredValue(formData);
+
   // Auto-update bottom banner when mode resets to manual or profondeur
   useEffect(() => {
     if (formData.programMode !== 'clubE') {
-      setFormData(prev => ({ ...prev, bottomBannerText: DEFAULT_BANNER_TEXT }));
+      if (formData.bottomBannerText !== DEFAULT_BANNER_TEXT) {
+        setFormData(prev => ({ ...prev, bottomBannerText: DEFAULT_BANNER_TEXT }));
+      }
     }
   }, [formData.programMode]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleModeChange = (mode: 'manual' | 'profondeur' | 'clubE') => {
+  const handleModeChange = useCallback((mode: 'manual' | 'profondeur' | 'clubE') => {
     setFormData(prev => ({ ...prev, programMode: mode }));
-  };
+  }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, speakerImageUrl: imageUrl }));
+      // Validate file type
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/svg+xml'];
+      if (!validImageTypes.includes(file.type)) {
+        alert('Format d\'image non supporté. Veuillez utiliser JPEG, PNG, WebP, GIF, BMP ou SVG.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageUrl = event.target?.result as string;
+        setFormData((prev) => ({ ...prev, speakerImageUrl: imageUrl }));
+      };
+      reader.onerror = () => {
+        alert('Erreur lors de la lecture du fichier image.');
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  // Helper to wait for fonts to be ready
+  const waitForFonts = async () => {
+    try {
+      if ('fonts' in document) {
+        await (document as any).fonts.ready;
+      }
+    } catch (e) {
+      console.warn("Font loading wait failed, continuing anyway", e);
     }
   };
 
-  const downloadPoster = async () => {
-    if (!hiddenRenderRef.current) return;
+  const downloadPoster = useCallback(async () => {
+    if (!hiddenRenderRef.current) {
+        console.error("Reference to hidden render div is null");
+        return;
+    }
+    
     setIsExporting(true);
     
-    // 1. Wait longer for mobile/slower connections to settle fonts and images
-    await new Promise(r => setTimeout(r, 1000));
-    
     try {
-      // 2. Use toBlob for better memory handling on mobile browsers
-      const blob = await htmlToImage.toBlob(hiddenRenderRef.current, {
-        quality: 1,
-        pixelRatio: 2,
-        width: 1080,
-        height: 1350,
-        cacheBust: true,
-        skipFonts: false,
-        style: {
-           // Ensure it's fully opaque during capture
-           opacity: "1",
-           visibility: "visible"
-        }
+      // 1. Wait for fonts and images to load
+      await waitForFonts();
+      
+      // Wait for all images in the div to load
+      const images = hiddenRenderRef.current.querySelectorAll('img');
+      const imageLoads = Array.from(images).map(img => {
+        return new Promise<void>((resolve) => {
+          if ((img as HTMLImageElement).complete) {
+            resolve();
+          } else {
+            img.onload = () => resolve();
+            img.onerror = () => resolve(); // Continue even if image fails
+          }
+        });
       });
+      await Promise.all(imageLoads);
+      
+      // Additional wait for rendering
+      await new Promise(r => setTimeout(r, 1200));
+      
+      // Determine pixel ratio
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const targetPixelRatio = isMobile ? 1.5 : 2;
 
-      if (!blob) throw new Error("Échec de la création du blob");
+      let dataUrl: string | null = null;
+      let error: Error | null = null;
 
-      // 3. Trigger download via URL object
-      const url = URL.createObjectURL(blob);
+      // 2. Try primary method: html-to-image toPng
+      try {
+        dataUrl = await htmlToImage.toPng(hiddenRenderRef.current, {
+          quality: 0.95,
+          pixelRatio: targetPixelRatio,
+          width: 1080,
+          height: 1350,
+          style: {
+             opacity: "1",
+             visibility: "visible",
+             display: "block",
+             transform: "none",
+             position: "relative",
+             left: "0",
+             top: "0"
+          },
+          cacheBust: true,
+          fontEmbedCSS: undefined,
+        });
+      } catch (err) {
+        console.warn("Primary toPng method failed, trying toJpeg:", err);
+        error = err as Error;
+        
+        // 3. Fallback: Try toJpeg (often more resilient)
+        try {
+          dataUrl = await htmlToImage.toJpeg(hiddenRenderRef.current, {
+            quality: 0.92,
+            pixelRatio: targetPixelRatio,
+            width: 1080,
+            height: 1350,
+            style: {
+               opacity: "1",
+               visibility: "visible",
+               display: "block",
+               transform: "none",
+               position: "relative",
+               left: "0",
+               top: "0"
+            },
+            cacheBust: true,
+          });
+          console.log("Successfully exported as JPEG");
+        } catch (jpegErr) {
+          console.warn("toJpeg also failed, trying canvas method:", jpegErr);
+          error = jpegErr as Error;
+          
+          // 4. Fallback: Direct canvas method
+          try {
+            const canvas = await htmlToImage.toCanvas(hiddenRenderRef.current, {
+              pixelRatio: targetPixelRatio,
+              width: 1080,
+              height: 1350,
+            });
+            dataUrl = canvas.toDataURL('image/png', 0.95);
+            console.log("Successfully exported via canvas");
+          } catch (canvasErr) {
+            console.error("Canvas method also failed:", canvasErr);
+            error = canvasErr as Error;
+          }
+        }
+      }
+
+      // 5. Validate and download
+      if (!dataUrl || dataUrl.length < 100) {
+        throw new Error("L'image générée est vide ou invalide. " + (error ? error.message : "Cause inconnue."));
+      }
+
+      // Create and trigger download
       const link = document.createElement("a");
-      link.download = `Affiche_${formData.speakerName.replace(/\s+/g, "_")}.png`;
-      link.href = url;
+      const speakerNameSafe = formData.speakerName.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "");
+      link.download = `Affiche_${speakerNameSafe || "CEV"}_${Date.now()}.png`;
+      link.href = dataUrl;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      // Clean up the URL object
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      // Cleanup data URL
+      if (dataUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(dataUrl);
+      }
       
     } catch (err) {
-      console.error("Erreur lors de l'export: ", err);
-      alert("Erreur technique lors de la génération. Veuillez réessayer ou utiliser un autre navigateur.");
+      console.error("Erreur détaillée lors de l'export: ", err);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      alert(
+        `Erreur lors du téléchargement de l'affiche:\n\n${errorMsg}\n\n` +
+        `Suggestions:\n` +
+        `• Essayez avec une image de plus petite taille\n` +
+        `• Convertissez votre image en JPEG ou PNG\n` +
+        `• Vérifiez votre connexion internet\n` +
+        `• Rafraîchissez la page et réessayez`
+      );
     } finally {
       setIsExporting(false);
     }
-  };
+  }, [hiddenRenderRef, formData]);
 
   return (
     // Root shell: full screen, no overflow, flex column on mobile, flex row on desktop
@@ -265,7 +383,7 @@ function App() {
               <Sparkles size={15} className="text-yellow-500" /> Couleur de l'arrière-plan
             </label>
             <div className="flex gap-3 flex-wrap">
-              {['#9e0b0d', '#000533', '#000000', '#4c1d95', '#003333', '#880e4f'].map(color => (
+              {['#9e0b0d', '#000533', '#000000', '#4c1d95', '#003333', '#880e4f', '#160e88db'].map(color => (
                 <button
                   key={color}
                   onClick={() => setFormData(prev => ({ ...prev, bgColor: color }))}
@@ -292,18 +410,18 @@ function App() {
             </label>
           </div>
 
-        </div>
+          {/* Bouton de téléchargement (plus proche du formulaire) */}
+          <div className="pt-3">
+            <button
+              onClick={downloadPoster}
+              disabled={isExporting}
+              className="w-full bg-slate-900 text-white font-bold text-base sm:text-lg py-3 sm:py-4 rounded-xl shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <Download size={20} />
+              {isExporting ? "Génération..." : "TÉLÉCHARGER L'AFFICHE"}
+            </button>
+          </div>
 
-        {/* Download button — sticky at the bottom of the form panel */}
-        <div className="px-5 py-4 sm:px-7 sm:py-5 border-t border-slate-100 shrink-0 bg-white">
-          <button
-            onClick={downloadPoster}
-            disabled={isExporting}
-            className="w-full bg-slate-900 text-white font-bold text-base sm:text-lg py-3 sm:py-4 rounded-xl shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <Download size={20} />
-            {isExporting ? "Génération..." : "TÉLÉCHARGER L'AFFICHE"}
-          </button>
         </div>
       </div>
 
@@ -337,7 +455,7 @@ function App() {
         >
           <Player
             component={PosterComposition as React.FC<any>}
-            inputProps={formData}
+            inputProps={deferredFormData}
             durationInFrames={1}
             fps={30}
             compositionWidth={1080}
@@ -352,10 +470,18 @@ function App() {
       {/* Hidden render for export — moved off-screen but rendered for capture */}
       <div 
         className="fixed" 
-        style={{ left: '-9999px', top: '0', pointerEvents: 'none' }} 
+        style={{ left: '-9999px', top: '0', pointerEvents: 'none', position: 'fixed' }} 
         aria-hidden="true"
       >
-        <div ref={hiddenRenderRef} style={{ width: 1080, height: 1350, position: 'relative' }}>
+        <div 
+            ref={hiddenRenderRef} 
+            style={{ 
+                width: 1080, 
+                height: 1350, 
+                position: 'relative', 
+                backgroundColor: formData.bgColor || '#9e0b0d' 
+            }}
+        >
           <PosterComposition {...formData} />
         </div>
       </div>
@@ -364,4 +490,4 @@ function App() {
   );
 }
 
-export default App;
+export default memo(App);

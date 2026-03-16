@@ -1,4 +1,5 @@
 import { AbsoluteFill, Img } from "remotion";
+import { useMemo, memo } from "react";
 
 export interface PosterProps {
     programMode: 'manual' | 'profondeur' | 'clubE';
@@ -11,7 +12,53 @@ export interface PosterProps {
     bgColor?: string;
 }
 
-export const PosterComposition: React.FC<PosterProps> = ({
+const SplitSpeakerName = memo(({ name }: { name: string }) => {
+    const { first, rest } = useMemo(() => {
+        const trimmed = name.trim();
+        if (!trimmed) return { first: "", rest: "" };
+        const parts = trimmed.split(/\s+/);
+        if (parts.length === 1) return { first: parts[0], rest: "" };
+        return { first: parts[0], rest: parts.slice(1).join(" ") };
+    }, [name]);
+
+    return (
+        <h1 className="text-white text-[38px] font-extrabold tracking-wide drop-shadow-sm m-0 leading-none py-1 flex items-baseline gap-3">
+            <span style={{
+                fontFamily: "'Pacifico', cursive",
+                fontWeight: "normal",
+                fontSize: "1.2em",
+                textTransform: "none"
+            }}>
+                {first}
+            </span>
+            <span style={{ textTransform: "none" }}>{rest}</span>
+        </h1>
+    );
+});
+
+const QuoteText = memo(({ text }: { text: string }) => {
+    const fontSize = useMemo(() => {
+        if (text.length < 60) return "56px";
+        if (text.length < 120) return "48px";
+        if (text.length < 200) return "38px";
+        return "30px";
+    }, [text.length]);
+
+    return (
+        <p
+            className="text-white font-bold leading-[1.3] drop-shadow-2xl relative z-10"
+            style={{
+                textShadow: "0px 4px 15px rgba(0,0,0,0.8)",
+                fontFamily: "'Georgia', serif",
+                fontSize
+            }}
+        >
+            {text || "La croissance spirituelle ne se définit pas par les dons, ni la connaissance des écritures, mais par la capacité à devenir comme Christ."}
+        </p>
+    );
+});
+
+const PosterCompositionInner: React.FC<PosterProps> = ({
     programMode,
     manualProgramName,
     quoteText,
@@ -21,16 +68,6 @@ export const PosterComposition: React.FC<PosterProps> = ({
     bottomBannerPhone,
     bgColor = "#9e0b0d"
 }) => {
-    // Helper to split speaker name: first word in one style, rest in another
-    const splitSpeakerName = (name: string) => {
-        const trimmed = name.trim();
-        if (!trimmed) return { first: "", rest: "" };
-        const parts = trimmed.split(/\s+/);
-        if (parts.length === 1) return { first: parts[0], rest: "" };
-        return { first: parts[0], rest: parts.slice(1).join(" ") };
-    };
-
-    const { first, rest } = splitSpeakerName(speakerName || "Yannick Djatti");
 
     return (
         <AbsoluteFill style={{ backgroundColor: bgColor }} className="overflow-hidden font-sans">
@@ -148,18 +185,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
 
                 {/* Right side: Quote Text */}
                 <div className="w-[48%] h-full pl-[35px] flex flex-col justify-center pt-[40px] pb-[40px] relative">
-                    <p
-                        className="text-white font-bold leading-[1.3] drop-shadow-2xl relative z-10"
-                        style={{
-                            textShadow: "0px 4px 15px rgba(0,0,0,0.8)",
-                            fontFamily: "'Georgia', serif",
-                            fontSize: quoteText.length < 60 ? "56px" :
-                                quoteText.length < 120 ? "48px" :
-                                    quoteText.length < 200 ? "38px" : "30px"
-                        }}
-                    >
-                        {quoteText || "La croissance spirituelle ne se définit pas par les dons, ni la connaissance des écritures, mais par la capacité à devenir comme Christ."}
-                    </p>
+                    <QuoteText text={quoteText} />
                 </div>
             </div>
 
@@ -167,18 +193,7 @@ export const PosterComposition: React.FC<PosterProps> = ({
             <div className="absolute top-[1110px] w-full text-center z-10 flex flex-col justify-center items-center">
                 <div className="flex flex-col items-center">
                     <div className="bg-[#ff8200] px-10 py-1 shadow-2xl transform origin-center max-w-[800px] flex items-center justify-center">
-                        <h1 className="text-white text-[38px] font-extrabold tracking-wide drop-shadow-sm m-0 leading-none py-1 flex items-baseline gap-3">
-                            {/* Force Pacifico font on the first word */}
-                            <span style={{
-                                fontFamily: "'Pacifico', cursive",
-                                fontWeight: "normal",
-                                fontSize: "1.2em",
-                                textTransform: "none" // Keep original casing for script
-                            }}>
-                                {first}
-                            </span>
-                            <span style={{ textTransform: "none" }}>{rest}</span>
-                        </h1>
+                        <SplitSpeakerName name={speakerName || "Yannick Djatti"} />
                     </div>
                 </div>
             </div>
@@ -197,3 +212,5 @@ export const PosterComposition: React.FC<PosterProps> = ({
         </AbsoluteFill>
     );
 };
+
+export const PosterComposition = memo(PosterCompositionInner);
